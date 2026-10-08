@@ -1,16 +1,28 @@
-.PHONY: all clean debug
+.PHONY: all clean debug test archive
 
-APP = prg1
+# TODO
+# добавить суффикс к имени программы согласно варианту
+# Петр Сергеевич Иванов
+# группа — N31451
+# prg1psiN31451
+
+NAME = prg1
 CFLAGS = -Wall -Wextra -Werror
 
-all: $(APP)
+all: $(NAME)
 
-$(APP): $(APP).c
-	gcc -o $(APP) $(CFLAGS) $(APP).c
+$(NAME): main.c
+	gcc -o $(NAME) $(CFLAGS) main.c
 
-debug: $(APP).c
-	gcc -o $(APP) $(CFLAGS) -g $(APP).c
+debug: main.c
+	gcc -o $(NAME) $(CFLAGS) -g main.c
+
+test: $(NAME)
+	./test.sh
+
+archive: clean
+	tar -czf $(NAME).tar.gz main.c Makefile README.txt
 
 clean:
-	rm $(APP)
+	rm -f $(NAME) $(NAME).tar.gz
 
