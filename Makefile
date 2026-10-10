@@ -6,7 +6,7 @@
 # группа — N31451
 # prg1psiN31451
 
-NAME = prg1
+NAME = prg1mamN3149
 CFLAGS = -Wall -Wextra -Werror
 
 all: $(NAME)

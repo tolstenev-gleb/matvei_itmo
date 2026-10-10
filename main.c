@@ -6,13 +6,13 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define INT_TYPE uint16_t
+#define INT_TYPE uint32_t
 
-// Функция для проверки бита в числе по индексу
-int get_bit(INT_TYPE value, size_t index) {
+// Функция для проверки бита в числе по номеру
+int get_bit(INT_TYPE value, size_t number) {
   int bit;
-  INT_TYPE mask = 1 << index;
-  INT_TYPE result = value & mask;
+  INT_TYPE mask = 1 << number;
+  INT_TYPE result = mask & value;
   if (result != 0) {
     bit = 1;
   } else {
@@ -21,16 +21,16 @@ int get_bit(INT_TYPE value, size_t index) {
   return bit;
 }
 
-// Функция для получения байта по индексу
-uint8_t get_byte(INT_TYPE value, int index) {
+// Функция для получения байта по номеру
+uint8_t get_byte(INT_TYPE value, int number) {
     INT_TYPE mask = 0b11111111;
-    uint8_t byte = (value >> (8 * index)) & mask;
+    uint8_t byte = (value >> (8 * number)) & mask;
     return byte;
 }
 
 // Функция для проверки, является ли байт симметричным:
 // совпадают 0 и 7 биты, совпадают 1 и 6 биты.
-bool is_symmetric_byte(uint8_t byte) {
+bool proverka(uint8_t byte) {
     bool answer;
     if (get_bit(byte, 0) == get_bit(byte, 7) &&
         get_bit(byte, 1) == get_bit(byte, 6)) {
@@ -45,14 +45,14 @@ bool is_symmetric_byte(uint8_t byte) {
 void print_bits(INT_TYPE value) {
     size_t byte_count = sizeof(INT_TYPE);
 
-    for (size_t index = 0; index < byte_count; index++) {
-        uint8_t byte = get_byte(value, byte_count - 1 - index);
+    for (size_t number = 0; number < byte_count; number++) {
+        uint8_t byte = get_byte(value, byte_count - 1 - number);
 
         for (int i = 7; i >= 0; i--) {
             printf("%d", get_bit(byte, i));
         }
 
-        if (index + 1 < byte_count) {
+        if (number + 1 < byte_count) {
             printf(" ");
         }
     }
@@ -63,19 +63,21 @@ void print_bits(INT_TYPE value) {
 // Для типа INT_TYPE выполняет преобразование по варианту 5-15:
 // находит симметричные байты, а затем меняет их местами в обратном порядке.
 INT_TYPE transform_number(INT_TYPE value) {
-    size_t byte_count = sizeof(INT_TYPE);
-    uint8_t bytes[byte_count];
-    size_t positions[byte_count];
-    size_t count = 0;
+    int byte_count = sizeof(INT_TYPE);
+    uint8_t bytes[byte_count];  // cоздание массива отдельных байтов
+    int positions[byte_count];  // позиции (индексы / номера) симметричных байтов
+    int count = 0;
 
-    for (size_t index = 0; index < byte_count; index++) {
-        bytes[index] = get_byte(value, index);
+    // разбиваем число на байты и сохраняем их по отдельности в массив
+    for (int number = 0; number < byte_count; number++) {
+        bytes[number] = get_byte(value, number);
     }
 
-    for (size_t index = 0; index < byte_count; index++) {
-        if (is_symmetric_byte(bytes[index])) {
-            positions[count] = index;
-            count++;
+    // проверяем байты по отдельности на симметричность и номера симметричных байтов сохраняем в массив positions
+    for (int number = 0; number < byte_count; number++) {
+        if (proverka(bytes[number]) == 1) {
+            positions[count] = number;
+            count = count + 1;
         }
     }
 
@@ -84,42 +86,62 @@ INT_TYPE transform_number(INT_TYPE value) {
     if (count == 0 || count == 1) {
         result = value;
     } else {
-        for (size_t index = 0; index < count / 2; index++) {
-            size_t left = positions[index];
-            size_t right = positions[count - 1 - index];
+        // Упорядочивает массив bytes согласно заданию (делает перестановку)
+        for (int number = 0; number < count / 2; number++) {
+            int left = positions[number];
+            int right = positions[count - 1 - number];
+            // Перестановка через временную переменную
             uint8_t temp = bytes[left];
             bytes[left] = bytes[right];
             bytes[right] = temp;
         }
 
-        for (size_t index = 0; index < byte_count; index++) {
-            result = result | ((INT_TYPE)(bytes[index] << (8 * index)));
+        for (int number = 0; number < byte_count; number++) {
+            // printf("number: %d\n", number);
+            // printf("bytes[%d]: %d\n", number, bytes[number]);
+            // print_bits(bytes[number]);
+            // printf("8 * %d: %d\n", number, 8 * number);
+            // printf("  byte: ");
+            // print_bits(bytes[number] << (8 * number));
+
+            result = result | ((INT_TYPE)(bytes[number] << (8 * number)));
+            
+            // printf("result: ");
+            // print_bits(result);
+            printf("\n");
         }
     }
     return result;
 }
 
-bool parse_uint(const char *text, INT_TYPE *value) {
+bool parse_uint(const char *text, INT_TYPE *ptr_value) {
     char *end = NULL;
-    unsigned long long parsed = 0u;
+    unsigned long long parsed_number = 0u;
 
     errno = 0;
-    parsed = strtoull(text, &end, 10);
+    parsed_number = strtoull(text, &end, 10);
 
     if (errno != 0 || end == text || *end != '\0') {
+        // errno будет не нулевым (конкретно значение ERANGE), если был указан знак минуса в исходном числе, то возвращается абсолютное значение результата преобразования. Если абсолютное значение вызовет "переполнение", то устанавливается ERANGE
+
+        // end == text - в строке вообще нет цифр
+
+        // *end != '\0' - если цифры есть, но попались другие символы (не цифры)
+
         return false;
     }
 
-    if (parsed > (INT_TYPE)-1) {
+    if (parsed_number > (INT_TYPE)-1) { // (INT_TYPE)-1 - максимально возможное число (все биты в единице)
         return false;
     }
 
-    *value = (INT_TYPE)parsed;
+    *ptr_value = (INT_TYPE)parsed_number;
     return true;
 }
 
 int main(int argc, char *argv[]) {
     INT_TYPE value;
+    bool status;
     char *programm_name = argv[0];
     char *string_number = argv[1];
     
@@ -129,7 +151,8 @@ int main(int argc, char *argv[]) {
     }
 
     if (argc == 2) {
-        if (false == parse_uint(string_number, &value)) {
+        status = parse_uint(string_number, &value);
+        if (status == false) {
             fprintf(stderr, "Ошибка: '%s' не является числом.\n", argv[1]);
             return EXIT_FAILURE;
         }
