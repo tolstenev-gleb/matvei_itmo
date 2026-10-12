@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define INT_TYPE uint32_t
+#define INT_TYPE uint16_t
 
 // Функция для проверки бита в числе по номеру
 int get_bit(INT_TYPE value, size_t number) {
@@ -108,7 +108,7 @@ INT_TYPE transform_number(INT_TYPE value) {
             
             // printf("result: ");
             // print_bits(result);
-            printf("\n");
+            // printf("\n");
         }
     }
     return result;
@@ -139,28 +139,36 @@ bool parse_uint(const char *text, INT_TYPE *ptr_value) {
     return true;
 }
 
+// argc - argument counter - счётчик аргументов
+
 int main(int argc, char *argv[]) {
-    INT_TYPE value;
+    INT_TYPE value = 0;
     bool status;
     char *programm_name = argv[0];
     char *string_number = argv[1];
-    
-    if (argc != 2) {
-        fprintf(stderr, "Usage: %s [число]\n", programm_name);
-        return EXIT_FAILURE;
-    }
 
-    if (argc == 2) {
-        status = parse_uint(string_number, &value);
-        if (status == false) {
-            fprintf(stderr, "Ошибка: '%s' не является числом.\n", argv[1]);
-            return EXIT_FAILURE;
-        }
-    } else {
+    // запуск программы без числа - argc равно 1 (аргумент - только имя программы)
+    if (argc == 1)
+    {
+        // то генерируем
         srand(time(NULL));
         value = (INT_TYPE)rand();
     }
-
+    else if (argc == 2)  // запуск программы с 2 аргументами - имя программы и кандидат на число 
+    {
+        status = parse_uint(string_number, &value);
+        if (status == false)
+        {
+            fprintf(stderr, "Ошибка: '%s' не является числом.\n", string_number);
+            return EXIT_FAILURE;
+        }
+    }
+    else // запуск программы с 3 и более аргументами - ошибка использования программы
+    {
+        fprintf(stderr, "Usage: %s [число]\n", programm_name);
+        return EXIT_FAILURE;
+    }
+    
     print_bits(value);
 
     value = transform_number(value);

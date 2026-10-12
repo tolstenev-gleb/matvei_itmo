@@ -1,11 +1,5 @@
 .PHONY: all clean debug test archive
 
-# TODO
-# добавить суффикс к имени программы согласно варианту
-# Петр Сергеевич Иванов
-# группа — N31451
-# prg1psiN31451
-
 NAME = prg1mamN3149
 CFLAGS = -Wall -Wextra -Werror
 
