@@ -1,3 +1,5 @@
+// Работа с указателями
+
 #include <stdio.h>
 
 int func(int a, int *ptr_qube) {

@@ -114,6 +114,8 @@ INT_TYPE transform_number(INT_TYPE value) {
     return result;
 }
 
+// Переводит число из строки text в INT_TYPE, записывает его по указателю ptr_value,
+// и возвращает статус: true - успешное преобразование, false - ошибка
 bool parse_uint(const char *text, INT_TYPE *ptr_value) {
     char *end = NULL;
     unsigned long long parsed_number = 0u;

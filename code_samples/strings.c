@@ -8,30 +8,25 @@
 // Строка в Си - это массив символов, заканчивающийся нулём '\0'
 
 int main(int argc, char *argv[]) {
-  // char str0[] = {'a', 'b', 'c', '\0'};
-  // char str1[] = "abc";
-  // char *str1 = "abc";
+  char str0[] = {'a', 'b', 'c', '\0'};
+  char str1[] = "abc";
+  char *str = "abc";
 
-  // printf("%s\n", str1);
+  printf("%s\n", str);
 
-  // printf("%c\n", str1[0]);
-  // printf("%c\n", str1[1]);
-  // printf("%c\n", str1[2]);
-  // printf("%d\n", str1[3]);
+  printf("%c\n", str[0]);
+  printf("%c\n", str[1]);
+  printf("%c\n", str[2]);
+  printf("%d\n", str[3]);
 
-  // str1[0] = 'A';
+  // str[0] = 'A';  // При изменении "char *" - ошибка Segmentation fault
 
-  // printf("%s\n", str1);
+  printf("%s\n", str);
 
-  // char *str_array[] = {"abc", "cat", "dog"};
-  // printf("%s\n", str_array[0]);
-  // printf("%s\n", str_array[1]);
-  // printf("%s\n", str_array[2]);
+  char *str_array[] = {"abc", "cat", "dog"};
+  printf("%s\n", str_array[0]);
+  printf("%s\n", str_array[1]);
+  printf("%s\n", str_array[2]);
 
-  printf("%d\n", argc);
-  printf("%s\n", argv[0]);
-  printf("%s\n", argv[1]);
-  printf("%s\n", argv[2]);
-
+  return 0;
 }
-
