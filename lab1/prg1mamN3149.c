@@ -60,55 +60,45 @@ void print_bits(INT_TYPE value) {
     printf("\n");
 }
 
+INT_TYPE set_byte(INT_TYPE value, uint8_t byte, int number) {
+    INT_TYPE mask = (INT_TYPE)0xFF << (8 * number);
+
+    value = value & ~mask;
+    value = value | ((INT_TYPE)byte << (8 * number));
+
+    return value;
+}
+
 // Для типа INT_TYPE выполняет преобразование по варианту 5-15:
 // находит симметричные байты, а затем меняет их местами в обратном порядке.
 INT_TYPE transform_number(INT_TYPE value) {
-    int byte_count = sizeof(INT_TYPE);
-    uint8_t bytes[byte_count];  // cоздание массива отдельных байтов
-    int positions[byte_count];  // позиции (индексы / номера) симметричных байтов
-    int count = 0;
+    INT_TYPE result = value;
+    int left_index = 0;
+    int right_index = sizeof(INT_TYPE) - 1;
 
-    // разбиваем число на байты и сохраняем их по отдельности в массив
-    for (int number = 0; number < byte_count; number++) {
-        bytes[number] = get_byte(value, number);
-    }
-
-    // проверяем байты по отдельности на симметричность и номера симметричных байтов сохраняем в массив positions
-    for (int number = 0; number < byte_count; number++) {
-        if (proverka(bytes[number]) == 1) {
-            positions[count] = number;
-            count = count + 1;
-        }
-    }
-
-    INT_TYPE result = 0;
-
-    if (count == 0 || count == 1) {
-        result = value;
-    } else {
-        // Упорядочивает массив bytes согласно заданию (делает перестановку)
-        for (int number = 0; number < count / 2; number++) {
-            int left = positions[number];
-            int right = positions[count - 1 - number];
-            // Перестановка через временную переменную
-            uint8_t temp = bytes[left];
-            bytes[left] = bytes[right];
-            bytes[right] = temp;
+    while (left_index < right_index) {
+        while (left_index < right_index &&
+               false == proverka(get_byte(value, left_index)))
+        {
+            left_index++;
         }
 
-        for (int number = 0; number < byte_count; number++) {
-            // printf("number: %d\n", number);
-            // printf("bytes[%d]: %d\n", number, bytes[number]);
-            // print_bits(bytes[number]);
-            // printf("8 * %d: %d\n", number, 8 * number);
-            // printf("  byte: ");
-            // print_bits(bytes[number] << (8 * number));
+        while (left_index < right_index &&
+               false == proverka(get_byte(value, right_index)))
+        {
+            right_index--;
+        }
 
-            result = result | ((INT_TYPE)(bytes[number] << (8 * number)));
-            
-            // printf("result: ");
-            // print_bits(result);
-            // printf("\n");
+        if (left_index < right_index)
+        {
+            uint8_t left_byte = get_byte(value, left_index);
+            uint8_t right_byte = get_byte(value, right_index);
+
+            result = set_byte(result, right_byte, left_index);
+            result = set_byte(result, left_byte, right_index);
+
+            left_index++;
+            right_index--;
         }
     }
     return result;
